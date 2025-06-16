@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Trọng Tài 2</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        display: flex;
+        justify-content: center;
+        margin-top: 40px;
+      }
+      .team-box {
+        border: 2px solid #ccc;
+        border-radius: 10px;
+        padding: 20px;
+        margin: 0 30px;
+        width: 220px;
+        text-align: center;
+      }
+      .red {
+        border-color: #e74c3c;
+      }
+      .blue {
+        border-color: #3498db;
+      }
+      .score {
+        font-size: 48px;
+        margin: 20px 0;
+      }
+      .buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: center;
+      }
+      .buttons button {
+        width: 60px;
+        height: 40px;
+        font-size: 18px;
+        cursor: pointer;
+      }
+      .red .score {
+        color: #e74c3c;
+      }
+      .blue .score {
+        color: #3498db;
+      }
+      .main-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .teams {
+        display: flex;
+        justify-content: center;
+        gap: 60px;
+        margin-bottom: 30px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="main-container">
+      <div class="teams">
+        <div class="team-box red">
+          <h2>Đội red</h2>
+          <div id="score-red" class="score">0</div>
+          <div class="buttons">
+            <button onclick="sendScore('red', 1)">+1</button>
+            <button onclick="sendScore('red', 2)">+2</button>
+            <button onclick="sendScore('red', 3)">+3</button>
+            <button onclick="sendScore('red', -1)">-1</button>
+            <button onclick="sendScore('red', -2)">-2</button>
+            <button onclick="sendScore('red', -3)">-3</button>
+          </div>
+        </div>
+
+        <div class="team-box blue">
+          <h2>Đội blue</h2>
+          <div id="score-blue" class="score">0</div>
+          <div class="buttons">
+            <button onclick="sendScore('blue', 1)">+1</button>
+            <button onclick="sendScore('blue', 2)">+2</button>
+            <button onclick="sendScore('blue', 3)">+3</button>
+            <button onclick="sendScore('blue', -1)">-1</button>
+            <button onclick="sendScore('blue', -2)">-2</button>
+            <button onclick="sendScore('blue', -3)">-3</button>
+          </div>
+        </div>
+      </div>
+      <ul id="messages"></ul>
+    </div>
+    <script>
+      // Lấy tên trọng tài từ tên file
+      //const referee = location.pathname.split("/").pop();
+      const referee = "Trọng Tài 2"; // Thay đổi tên trọng tài nếu cần
+
+      // Thay đổi URL WebSocket cho phù hợp với server của bạn
+      const ws = new WebSocket("ws://localhost:8765");
+
+      ws.onopen = () => {
+        console.log("WebSocket connected");
+      };
+
+      // ws.onmessage = (event) => {
+      //   // Dữ liệu server gửi về dạng: { red: số, blue: số }
+      //   try {
+      //     const data = JSON.parse(event.data);
+      //     if (typeof data.red === "number") {
+      //       document.getElementById("score-red").textContent = data.red;
+      //     }
+      //     if (typeof data.blue === "number") {
+      //       document.getElementById("score-blue").textContent = data.blue;
+      //     }
+      //   } catch (e) {
+      //     console.error("Invalid data from server", e);
+      //   }
+      // };
+      ws.onmessage = (event) => {
+        const parsed = JSON.parse(event.data);
+        const type = parsed.type;
+        switch (type) {
+          case "score_result":
+            const { red, blue } = parsed.data;
+            document.getElementById("score-red").textContent = red;
+            document.getElementById("score-blue").textContent = blue;
+            break;
+          case "player_message":
+            const li = document.createElement("li");
+            li.textContent = parsed.data;
+            document.getElementById("messages").appendChild(li);
+            break;
+          case "error":
+            if (parsed.data === "WAIT") {
+              alert("Vui lòng đợi, trọng tài đang xử lý dữ liệu.");
+              return;
+            }
+            break;
+          default:
+            console.error("Unknown message type:", type);
+        }
+      };
+
+      ws.onerror = (err) => {
+        console.error("WebSocket error", err);
+      };
+
+      function sendScore(team, value) {
+        const datime = new Date().toISOString().slice(0, 19).replace("T", " ");
+        const dataArray = [referee, team, value, datime];
+        if (ws.readyState === WebSocket.OPEN) {
+          ws.send(JSON.stringify(dataArray));
+        }
+      }
+    </script>
+  </body>
+</html>

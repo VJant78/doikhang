@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Điểm Tổng Đội Đỏ & Đội Xanh</title>
+    <style>
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: Arial, sans-serif;
+        background: #f4f4f4;
+        min-height: 100vh;
+        height: 100vh;
+        width: 100vw;
+        box-sizing: border-box;
+        overflow: hidden;
+      }
+      .scoreboard {
+        display: flex;
+        flex-direction: row;
+        width: 100vw;
+        height: 100vh;
+        margin: 0;
+        gap: 0;
+      }
+      .team {
+        flex: 1 1 0;
+        min-width: 0;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        border-radius: 0;
+        box-shadow: none;
+        padding: 0;
+        margin: 0;
+        height: 100%;
+      }
+      .red {
+        background: #fff0f0;
+        border-right: 4px solid #e53935;
+      }
+      .blue {
+        background: #f0f8ff;
+        border-left: 4px solid #1e88e5;
+      }
+      .team-name {
+        font-size: 3em;
+        margin-bottom: 30px;
+      }
+      .score {
+        font-size: 7em;
+        font-weight: bold;
+      }
+      h1 {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Điểm Tổng</h1>
+    <div class="scoreboard">
+      <div class="team red">
+        <div class="team-name" style="color: #e53935">Đội Đỏ</div>
+        <div class="score" id="score-red">0</div>
+      </div>
+      <div class="team blue">
+        <div class="team-name" style="color: #1e88e5">Đội Xanh</div>
+        <div class="score" id="score-blue">0</div>
+      </div>
+    </div>
+
+    <script>
+      // Thay đổi URL WebSocket cho phù hợp với server của bạn
+      const ws = new WebSocket("ws://localhost:8765");
+
+      ws.onmessage = (event) => {
+        const parsed = JSON.parse(event.data);
+        const type = parsed.type;
+        switch (type) {
+          case "score_result":
+            const { red, blue } = parsed.data;
+            document.getElementById("score-red").textContent = red;
+            document.getElementById("score-blue").textContent = blue;
+            break;
+          default:
+            console.error("Unknown message type:", type);
+        }
+      };
+
+      ws.onerror = function () {
+        alert("Không thể kết nối tới máy chủ WebSocket!");
+      };
+    </script>
+  </body>
+</html>

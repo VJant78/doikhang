@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Gửi dữ liệu dạng mảng</title>
+  </head>
+  <body>
+    <input type="text" id="name" placeholder="Tên" />
+    <input type="text" id="team" placeholder="Đội" />
+    <input type="number" id="score" placeholder="Điểm" />
+    <button onclick="sendData()">Gửi</button>
+
+    <ul id="messages"></ul>
+
+    <script>
+      const ws = new WebSocket("ws://localhost:8765");
+
+      ws.onopen = () => {
+        console.log("Đã kết nối tới WebSocket server.");
+      };
+
+      ws.onmessage = (event) => {
+        const li = document.createElement("li");
+        li.textContent = event.data;
+        document.getElementById("messages").appendChild(li);
+      };
+
+      function sendData() {
+        const name = document.getElementById("name").value;
+        const team = document.getElementById("team").value;
+        const score = parseInt(document.getElementById("score").value);
+        const datime = new Date().toISOString().slice(0, 19).replace("T", " ");
+
+        const dataArray = [name, team, score, datime];
+        ws.send(JSON.stringify(dataArray)); // Gửi mảng JSON
+      }
+    </script>
+  </body>
+</html>
