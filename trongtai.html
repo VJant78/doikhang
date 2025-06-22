@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Trọng tài</title>
+  </head>
+  <body>
+    <h2>Gửi điểm từ trọng tài</h2>
+    <label>Referee ID: <input type="text" id="refId" /></label><br />
+    <button onclick="sendVote('red', 1)">Đỏ +1</button>
+    <button onclick="sendVote('red', 2)">Đỏ +2</button>
+    <button onclick="sendVote('blue', 1)">Xanh +1</button>
+    <button onclick="sendVote('blue', 2)">Xanh +2</button>
+    <pre id="log"></pre>
+
+    <script>
+      const ws = new WebSocket("ws://localhost:8765");
+      const log = document.getElementById("log");
+
+      function sendVote(side, point) {
+        const refId = parseInt(document.getElementById("refId").value);
+        if (!refId) return alert("Nhập referee_id");
+        const message = {
+          type: "vote",
+          data: { referee_id: refId, side, point },
+        };
+        ws.send(JSON.stringify(message));
+        log.innerText += `Gửi: ${side.toUpperCase()} +${point}\n`;
+      }
+
+      ws.onmessage = (event) => {
+        const msg = JSON.parse(event.data);
+        type = msg.type;
+        switch (type) {
+          case "score_result":
+            log.innerText += `server: ${JSON.stringify(msg)}\n`;
+            break;
+          case "error":
+            alert(msg.data);
+            break;
+          case "control":
+            log.innerText += `Lệnh từ server: ${msg.data}\n`;
+            break;
+          default:
+            log.innerText += `Tin nhắn không xác định: ${JSON.stringify(
+              msg
+            )}\n`;
+        }
+      };
+    </script>
+  </body>
+</html>
