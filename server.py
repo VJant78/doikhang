@@ -1,119 +1,116 @@
 import asyncio
 import websockets
 import json
-from datetime import datetime
-from collections import Counter
+from collections import defaultdict
 
 connected_clients = set()
-message_inque = []
-temp_score = {"blue": 0, "red": 0}
-score = {"blue": 0, "red": 0}
-score_result_payload = {
-    "type": "score_result"
-}
-message_payload = {
-    "type": "player_message"
-}
-message_error = {
-    "type": "error"
-}
-def cal_temp_score(message_inque):
-    # Đặt lại giá trị temp_score
-    for key in temp_score:
-        temp_score[key] = 0
+vote_queue = []
+score = {"red": 0, "blue": 0}
 
-    for team in temp_score.keys():
-        # Lọc danh sách score của team
-        team_scores = [item[2] for item in message_inque if item[1] == team]
+vote_timer_task = None
+vote_lock = asyncio.Lock()
 
-        # Đếm số lần xuất hiện
-        score_counts = Counter(team_scores)
+# ==== Vote Processing ====
+def get_majority_vote(votes):
+    counter = defaultdict(int)
+    for v in votes:
+        key = (v["data"]["side"], v["data"]["point"])
+        counter[key] += 1
+    for (side, point), count in counter.items():
+        if count >= 3:
+            return {"side": side, "point": point}
+    return None
 
-        # Tìm các score bị trùng
-        duplicate_scores = [s for s, count in score_counts.items() if count >= 2]
+async def check_and_apply_votes():
+    global vote_queue
+    decision = get_majority_vote(vote_queue)
+    if decision:
+        score[decision["side"]] += decision["point"]
+        print(f"✅ {decision['side'].upper()} +{decision['point']} (theo đa số phiếu)")
+    else:
+        print("❌ Không đủ phiếu giống nhau")
+    await broadcast_score()
+    vote_queue.clear()
 
-        if duplicate_scores:
-            max_duplicate_score = max(duplicate_scores)
-            temp_score[team] = max_duplicate_score
-            print(f"✅ Team {team}: score trùng lớn nhất là {max_duplicate_score}")
-        else:
-            print(f"⚠️ Team {team}: không có score nào bị trùng.")
+async def start_vote_timer():
+    try:
+        await asyncio.sleep(3)
+        async with vote_lock:
+            if vote_queue:
+                await check_and_apply_votes()
+    except asyncio.CancelledError:
+        pass
 
-    print(f"\n📊 temp_score hiện tại: {temp_score}")
+async def handle_vote(data, websocket):
+    global vote_timer_task
+    referee_id = data["data"]["referee_id"]
+    side = data["data"]["side"]
+    point = data["data"]["point"]
+    
+    # Nếu trọng tài này đã vote, không cho vote tiếp trong tình huống này
+    if any(v["data"]["referee_id"] == referee_id for v in vote_queue):
+        await error_message(websocket, "Bạn đã vote rồi, vui lòng chờ tình huống mới.")
+        return
 
-def write_log(text): 
-    with open("log.txt", "a", encoding="utf-8") as f:
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        f.write(f"[{timestamp}] {text}\n")
+    vote_queue.append(data)
+    print(f"📥 Phiếu từ trọng tài {referee_id}: {side.upper()} +{point} (tổng phiếu: {len(vote_queue)})")
 
-def name_exists(name, message_inque):
-    return any(item[0] == name for item in message_inque)
+    if len(vote_queue) == 5:
+        if vote_timer_task:
+            vote_timer_task.cancel()
+        await check_and_apply_votes()
+    else:
+        if vote_timer_task:
+            vote_timer_task.cancel()
+        vote_timer_task = asyncio.create_task(start_vote_timer())
 
-async def echo(websocket):
-    client_ip, client_port = websocket.remote_address
-    print(f"📡 Client kết nối từ {client_ip}:{client_port}")
+# ==== Broadcasting ====
+async def broadcast(message):
+    await asyncio.gather(*[
+        client.send(json.dumps(message))
+        for client in connected_clients if client.open
+    ])
+
+async def broadcast_score():
+    await broadcast({"type": "score_result", "data": score})
+
+# ✅ Sửa đúng thứ tự tham số
+async def error_message(websocket, message):
+    await websocket.send(json.dumps({"type": "error", "data": message}))
+    
+# ==== Control Vote ====
+async def handle_control_vote(data):
+    # Xử lý điều khiển vote từ trọng tài máy
+    side = data["data"]["side"]
+    point = data["data"]["point"]
+    print(f"📥 Phiếu từ trọng tài máy: {side} +{point} ")
+    score[side] += point
+    await broadcast_score()
+
+# ==== WebSocket Server ====
+async def handle_client(websocket):
+    print(f"🔌 Client kết nối: {websocket.remote_address}")
     connected_clients.add(websocket)
-
     try:
         async for message in websocket:
             try:
-                # Parse message JSON
                 data = json.loads(message)
-                name, team, point, datime = data
-                print(f"📝 {name} - {team} - {point} điểm - {datime}")
-
-                # Kiểm tra name đã tồn tại chưa
-                if name_exists(name, message_inque):
-                    message_error["data"] = "WAIT"
-                    await websocket.send(json.dumps(message_error))
-                    continue
-
-                # Thêm vào hàng đợi
-                message_inque.append(data)
-
-                # Ghi log nếu cần
-                log_text = f"{client_ip}:{client_port} -> {message}"
-                # write_log(log_text)  # Bật lại nếu cần log
-
-                # Khi đủ 4 người thì tính điểm
-                if len(message_inque) == 4:
-                    cal_temp_score(message_inque)
-                    score["blue"] += temp_score["blue"]
-                    score["red"] += temp_score["red"]
-
-                    print(f"✅ Tổng điểm hiện tại: {score}")
-
-                    # Gửi kết quả về cho tất cả client
-                    for i in message_inque:
-                        message_payload["data"] = f"{i[0]}: {i[1]} ghi {i[2]} điểm lúc {i[3]}"
-                        await asyncio.gather(*[
-                            client.send(json.dumps(message_payload))
-                            for client in connected_clients if client.open
-                        ])
-
-                    # Gửi tổng điểm cuối lượt
-                    score_result_payload["data"] = {
-                        "blue": score["blue"],
-                        "red": score["red"]
-                    }
-                    await asyncio.gather(*[
-                        client.send(json.dumps(score_result_payload))
-                        for client in connected_clients if client.open
-                    ])
-
-                    # Dọn dữ liệu
-                    message_inque.clear()
-                    for key in temp_score:
-                        temp_score[key] = 0
-
-            except json.JSONDecodeError:
-                print("❌ Lỗi: Message không phải JSON hợp lệ")
+                if data["type"] == "vote":
+                    await handle_vote(data, websocket) 
+                elif data["type"] == "control_vote": 
+                    await handle_control_vote(data)    
+                elif data["type"] == "control":
+                    print(f"📝 Nhận điều khiển từ trọng tài máy: {data['data']}")
+                    await broadcast(data)
+            except Exception as e:
+                print("❌ Lỗi xử lý dữ liệu:", e)
     finally:
         connected_clients.remove(websocket)
+        print(f"❌ Client ngắt kết nối: {websocket.remote_address}")
 
 async def main():
-    async with websockets.serve(echo, "0.0.0.0", 8765):
-        print("🚀 WebSocket server đang chạy tại ws://0.0.0.0:8765")
+    async with websockets.serve(handle_client, "0.0.0.0", 8765):
+        print("🚀 Server đang chạy tại ws://localhost:8765")
         await asyncio.Future()
 
 if __name__ == "__main__":
