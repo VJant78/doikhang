@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <title>Bảng điểm Vovinam</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(135deg, #e3f0ff 0%, #f9f9f9 100%);
+      min-height: 100vh;
+    }
+
+    .header {
+      text-align: center;
+      padding: 18px 0 10px 0;
+      background: linear-gradient(90deg, #1e88e5 0%, #e53935 100%);
+      color: #fff;
+      font-size: 2.2rem;
+      font-weight: bold;
+      letter-spacing: 2px;
+      box-shadow: 0 2px 8px rgba(30,136,229,0.08);
+      border-radius: 0 0 18px 18px;
+      margin-bottom: 18px;
+    }
+
+    .top-section {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      padding: 0 30px 10px 30px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      gap: 18px;
+    }
+
+    .top-block, .top-center {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(30,136,229,0.07);
+      padding: 18px 10px 14px 10px;
+      min-width: 220px;
+      text-align: center;
+    }
+
+    .top-block {
+      width: 22%;
+      min-width: 180px;
+    }
+
+    .top-block .underline {
+      border-bottom: 2.5px solid #1e88e5;
+      margin: 8px auto 8px auto;
+      width: 70%;
+    }
+
+    .top-block div {
+      font-size: 1.2rem;
+      margin-bottom: 4px;
+    }
+
+    .top-center {
+      width: 38%;
+      min-width: 260px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .top-center .round {
+      font-size: 1.5rem;
+      font-weight: bold;
+      text-align: center;
+      border-radius: 6px;
+      background: #f7fafd;
+      padding: 7px 10px;
+      margin-bottom: 4px;
+    }
+
+    .top-center .timer {
+      font-size: 2.5rem;
+      font-weight: bold;
+      border: 2.5px solid #e53935;
+      border-radius: 10px;
+      padding: 8px 30px;
+      background: #fff0f0;
+      color: #e53935;
+      text-align: center;
+      margin-top: 4px;
+      box-shadow: 0 2px 8px rgba(229,57,53,0.07);
+    }
+
+    .main-section {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 24px;
+      padding: 18px 0 10px 0;
+    }
+
+    .judge-column {
+      display: grid;
+      grid-template-columns: repeat(2, 48px);
+      grid-template-rows: repeat(5, 48px);
+      gap: 7px;
+      background: #f7fafd;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(30,136,229,0.04);
+      padding: 10px 6px;
+    }
+
+    .square {
+      width: 48px;
+      height: 48px;
+      border: 2.5px solid #bdbdbd;
+      border-radius: 8px;
+      background: #fff;
+      transition: background 0.2s;
+    }
+
+    .score-box {
+      width: 700px;
+      height: 500px;
+      border-radius: 28px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 10rem;
+      font-weight: bold;
+      color: #fff;
+      box-shadow: 0 4px 24px rgba(30,136,229,0.13);
+      margin: 0 10px;
+      border: 6px solid #fff;
+    }
+
+    .red {
+      background: linear-gradient(135deg, #e53935 60%, #ffb3b3 100%);
+      border-color: #e53935;
+    }
+
+    .blue {
+      background: linear-gradient(135deg, #1e88e5 60%, #b3d1ff 100%);
+      border-color: #1e88e5;
+    }
+
+    .center-info {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 2px 8px rgba(30,136,229,0.07);
+      padding: 18px 18px 10px 18px;
+      min-width: 220px;
+    }
+
+    .weight-info {
+      border: 2px solid #1e88e5;
+      border-radius: 8px;
+      padding: 8px 18px;
+      text-align: center;
+      font-size: 1.1rem;
+      margin-bottom: 10px;
+      background: #f7fafd;
+      color: #1e88e5;
+      font-weight: 500;
+    }
+
+    .refs {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      font-size: 1.1rem;
+      margin-top: 10px;
+    }
+
+    .ref-row {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .ref-row .square {
+      font-size: 1.1rem;
+      text-align: center;
+      font-weight: bold;
+      align-content: space-around;
+    }
+
+    .label {
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: #333;
+      min-width: 32px;
+      text-align: center;
+    }
+
+    .bottom-section {
+      display: flex;
+      justify-content: center;
+      gap: 480px;
+      padding: 18px 0 30px 0;
+      flex-wrap: wrap;
+    }
+
+    .bottom-boxes {
+      display: flex;
+      gap: 18px;
+      align-items: center;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(30,136,229,0.07);
+      padding: 18px 18px 10px 18px;
+      min-width: 120px;
+    }
+
+    .small-box {
+      width: 38px;
+      height: 38px;
+      border: 2.5px solid #bdbdbd;
+      border-radius: 8px;
+      background: #f7fafd;
+      margin: 0 2px;
+      box-shadow: 0 2px 8px rgba(30,136,229,0.04);
+    }
+
+    @media (max-width: 1100px) {
+      .main-section { flex-direction: column; align-items: center; }
+      .bottom-section { gap: 30px; }
+      .top-section { flex-direction: column; gap: 10px; }
+      .score-box { font-size: 5rem; width: 160px; height: 120px; }
+    }
+
+    @media (max-width: 700px) {
+      .score-box { font-size: 2.5rem; width: 90px; height: 70px; }
+      .header { font-size: 1.2rem; }
+      .top-block, .top-center, .center-info, .bottom-boxes { min-width: 90vw; }
+    }
+  </style>
+</head>
+<body>
+  <div class="header" id = "tournament">Tên Giải</div>
+
+  <div class="top-section">
+    <div class="top-block">
+      <div id ="red_unit">Tên Đơn vị</div>
+      <div class="underline"></div>
+      <div id = "red_name">Tên VDV</div>
+    </div>
+
+    <div class="top-center">
+      <div class="round" id = "round">HIỆP 1</div>
+      <div class="timer" id ="time">Thời Gian</div>
+    </div>
+
+    <div class="top-block">
+      <div id ="blue_unit">Tên Đơn vị</div>
+      <div class="underline"></div>
+      <div id ="blue_name">Tên VDV</div>
+    </div>
+  </div>
+
+  <div class="main-section">
+    <!-- Judge Red -->
+    <div class="judge-column">
+      <div class="square" id="red-1-1"></div><div class="square" id="red-1-2"></div>
+      <div class="square" id="red-2-1"></div><div class="square" id="red-2-2"></div>
+      <div class="square" id="red-3-1"></div><div class="square" id="red-3-2"></div>
+      <div class="square" id="red-4-1"></div><div class="square" id="red-4-2"></div>
+      <div class="square" id="red-5-1"></div><div class="square" id="red-5-2"></div>
+    </div>
+
+    <!-- Score Red -->
+    <div class="score-box red" id ="score-red">00</div>
+
+    <!-- Center Info -->
+    <div class="center-info">
+      <div class="weight-info">
+        <div id = "weight">Hạng Cân</div>
+        <div id = "sex">Giới tính</div>
+      </div>
+
+      <div class="refs">
+        <div class="ref-row">
+        <div class="square" id="red-H1"></div>
+        <div class="label">H1</div>
+        <div class="square" id="blue-H1"></div>
+      </div>
+      <div class="ref-row">
+        <div class="square" id="red-H2"></div>
+        <div class="label">H2</div>
+        <div class="square" id="blue-H2"></div>
+      </div>
+      <div class="ref-row">
+        <div class="square" id="red-H3"></div>
+        <div class="label">HP</div>
+        <div class="square" id="blue-H3"></div>
+      </div>
+
+      </div>
+    </div>
+
+    <!-- Score Blue -->
+    <div class="score-box blue" id ="score-blue">00</div>
+
+    <!-- Judge Blue -->
+    <div class="judge-column">
+      <div class="square" id="blue-1-2"></div><div class="square" id="blue-1-1"></div>
+      <div class="square" id="blue-2-2"></div><div class="square" id="blue-2-1"></div>
+      <div class="square" id="blue-3-2"></div><div class="square" id="blue-3-1"></div>
+      <div class="square" id="blue-4-2"></div><div class="square" id="blue-4-1"></div>
+      <div class="square" id="blue-5-2"></div><div class="square" id="blue-5-1"></div>
+    </div>
+  </div>
+
+  <div class="bottom-section">
+    <div class="bottom-boxes">
+      <div class="small-box" id="red-W-1"></div>
+      <div class="small-box" id="red-W-2"></div>
+      <div class="small-box" id="red-W-3"></div>
+    </div>
+
+    <div class="bottom-boxes">
+      <div class="small-box" id="blue-W-1"></div>
+      <div class="small-box" id="blue-W-2"></div>
+      <div class="small-box" id="blue-W-3"></div>
+    </div>
+  </div>
+<script>
+    let ws;
+    const exdata = [];
+    const wdata =[];
+
+    const params = new URLSearchParams(window.location.search);
+    const dataIPws = params.get("ws");
+    const datarole = params.get("role");
+    console.log("Data IP:", dataIPws, "Role:", datarole);
+    function connectWS() {
+      // const ip = document.getElementById("ws_ip").value.trim();
+      // if (!ip) return alert("Vui lòng nhập địa chỉ IP WebSocket");
+
+      ws = new WebSocket("ws://" + dataIPws);
+
+      ws.onopen = () => {
+        // document.getElementById("ws_status").textContent = "✅ Đã kết nối";
+        // Gửi định danh role là 'score'
+        ws.send(JSON.stringify({ type: "identify", role: datarole }));
+        console.log("🎯 Sent identify: score");
+      };
+
+      ws.onmessage = (event) => {
+        console.log("📥 Nhận từ server:", event.data);
+        // Bạn có thể xử lý hiển thị thông tin nhận ở đây nếu cần
+        const msg = JSON.parse(event.data);
+        switch (msg.type) {
+          case "score_result":
+            const { red, blue } = msg.data;
+            document.getElementById('score-red').textContent = red;
+            document.getElementById('score-blue').textContent = blue;
+            exdata.forEach((data) => applyScore(data,false));
+            exdata.length = 0; // Xóa mảng sau khi áp dụng điểm
+            break;
+          case "error":
+            alert(msg.data);
+            break;
+          case "control":
+            console.log(`📢 Lệnh từ server: ${msg.data}`);
+            break;
+          case "send_info": 
+            // Cập nhật thông tin hiển thị
+            document.getElementById("tournament").textContent = msg.data.tournament || "Tên Giải";
+            document.getElementById("round").textContent = msg.data.round || "HIỆP 1";
+            document.getElementById("time").textContent = msg.data.time || "Thời Gian";
+            document.getElementById("red_unit").textContent = msg.data.red_unit || "Tên Đơn vị";
+            document.getElementById("red_name").textContent = msg.data.red_name || "Tên VDV";
+            document.getElementById("blue_unit").textContent = msg.data.blue_unit || "Tên Đơn vị";
+            document.getElementById("blue_name").textContent = msg.data.blue_name || "Tên VDV";
+            document.getElementById("weight").textContent = msg.data.weight || "Hạng Cân";
+            document.getElementById("sex").textContent = msg.data.sex || "Giới tính";
+            break;
+          case "vote":
+             const message = msg.data;
+             //push message to  const exampleData 
+             console.log("📤 message:", message);
+              exdata.push(message);
+              console.log("📤 exdata:", exdata);
+              exdata.forEach((data) => applyScore(data,true));
+              break;
+          case "warn":
+            const warnData = msg.data;
+            wdata.push(warnData);
+            wdata.forEach((data) => {
+              const { side,count } = data;
+              const buttonId = `${side}-W-${count}`;
+              const btn = document.getElementById(buttonId);
+              if (btn) {
+                btn.style.backgroundColor = side === "red" ? "red" : "blue";
+              }
+              if(count ===0){
+                btn.style.backgroundColor = side === white;
+              }
+            });
+            break;
+           case "match_state":
+            const match = msg.data;
+            window.currentStatus = match.status;
+            document.getElementById("round").innerText  = "Hiệp: " + match.current_round;
+            document.getElementById("time").innerText  = formatTime(match.time_left);
+            // Bạn có thể hiển thị trạng thái và thời gian tại đâu đó trong giao diện nếu muốn
+            console.log("🎯 Trạng thái trận:", match.status, "⏱️", match.time_left);
+          break; 
+          case "round_result":
+            const roundData = msg.data;
+            document.getElementById(`red-H${roundData.round}`).textContent = roundData.score_red
+            document.getElementById(`blue-H${roundData.round}`).textContent = roundData.score_blue
+          break;
+          default:
+            console.log(`❓ Không xác định: ${JSON.stringify(msg)}`);
+        }
+      };
+
+      ws.onerror = (e) => {
+        // document.getElementById("ws_status").textContent = "❌ Lỗi kết nối";
+        console.error("WebSocket error:", e);
+      };
+
+      ws.onclose = () => {
+        // document.getElementById("ws_status").textContent = "🔌 Mất kết nối";
+        console.warn("WebSocket closed");
+      };
+    }
+    connectWS()
+    
+
+    //logic color for score
+    function applyScore(data,valid) {
+        console.log("📤 applyScore:", data);
+        const { referee_id, side, point } = data;
+        const buttonId = `${side}-${referee_id}-${point}`;
+        const btn = document.getElementById(buttonId);
+        if (btn && valid) {
+          btn.style.backgroundColor = side === "red" ? "red" : "blue";
+        }
+        if (btn && !valid) {
+          btn.style.backgroundColor = "white";
+        }
+        console.log("📤 applyScore_end:", buttonId, "  btn ", btn);
+      }
+      function formatTime(seconds) {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+}
+</script>
+</body>
+</html>

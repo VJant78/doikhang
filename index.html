@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Trang A - Chọn Role và IP</title>
+</head>
+<body>
+  <h2>Trang A - Chọn địa chỉ WebSocket và vai trò</h2>
+  
+  <label>WebSocket IP:</label>
+  <input type="text" id="ws" placeholder="localhost:8765"><br><br>
+
+  <label>Role:</label>
+  <select id="role">
+    <option value="1">Trọng Tài 1</option>
+    <option value="2">Trọng Tài 2</option>
+    <option value="3">Trọng Tài 3</option>
+    <option value="4">Trọng Tài 4</option>
+    <option value="5">Trọng Tài 5</option>
+    <option value="main_Ref">Trọng Tài Máy</option>
+    <option value="score">Bảng Điểm</option>
+  </select><br><br>
+
+  <button onclick="goToB()">Đi tới trang B</button>
+
+  <script>
+    function goToB() {
+      const ws = document.getElementById("ws").value.trim();
+      const role = document.getElementById("role").value;
+
+      if (!ws) {
+        alert("Vui lòng nhập địa chỉ WebSocket");
+        return;
+      }
+
+      if(role === "score") {
+        const url = `score.html?ws=${encodeURIComponent(ws)}&role=${role}`;
+        window.location.href = url;     
+        }else if(role === "main_Ref") {
+        const url = `main-Referee.html?ws=${encodeURIComponent(ws)}&role=${role}`;
+        window.location.href = url;
+        } else {
+        const url = `testB.html?ws=${encodeURIComponent(ws)}&role=${role}`;
+        window.location.href = url; 
+        }
+      
+    }
+  </script>
+</body>
+</html>

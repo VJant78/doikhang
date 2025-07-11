@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Trang B - Nhận Dữ Liệu</title>
+</head>
+<body>
+  <h2>Trang B - Nhận dữ liệu từ Trang A</h2>
+
+  <p><strong>Địa chỉ WebSocket:</strong> <span id="ws"></span></p>
+  <p><strong>Vai trò:</strong> <span id="role"></span></p>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const ws = params.get("ws");
+    const role = params.get("role");
+
+    document.getElementById("ws").textContent = ws || "Không có";
+    document.getElementById("role").textContent = role || "Không có";
+  </script>
+</body>
+</html>

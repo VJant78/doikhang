@@ -1,70 +1,53 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="UTF-8" />
-    <title>Trọng tài máy</title>
-  </head>
-  <body>
-    <h2>Điều khiển từ trọng tài máy</h2>
-    <div>
-      <label>Số hiệp: <input type="number" id="roundCount" /></label><br />
-      <label>Thời gian: <input type="number" id="timeLimit" /></label><br />
-      <label>Thời gian nghỉ: <input type="number" id="restTime" /></label><br />
-    </div>
-    <div>
-      <button onclick="sendScore('red', 1)">Đỏ +1</button>
-      <button onclick="sendScore('red', 2)">Đỏ +2</button>
-      <button onclick="sendScore('red', -1)">Đỏ -1</button>
-      <button onclick="sendScore('red', -2)">Đỏ -2</button>
-      <button onclick="sendScore('blue', 1)">Xanh +1</button>
-      <button onclick="sendScore('blue', 2)">Xanh +2</button>
-      <button onclick="sendScore('blue', -1)">Xanh -1</button>
-      <button onclick="sendScore('blue', -2)">Xanh -2</button>
-    </div>
-    <div>
-      <button onclick="sendCmd('start')">Bắt đầu</button>
-      <button onclick="sendCmd('pause')">Tạm dừng</button>
-      <button onclick="sendCmd('stop')">Kết Thúc</button>
-      <button onclick="sendCmd('Dwarn')">Nhắc nhở Đỏ</button>
-      <button onclick="sendCmd('Rwarn')">Nhắc nhở Xanh</button>
-      <button onclick="sendCmd('red_win')">Đỏ thắng</button>
-      <button onclick="sendCmd('blue_win')">Xanh thắng</button>
-    </div>
-    <pre id="log"></pre>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <title>Chọn vai trò</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
 
-    <script>
-      const ws = new WebSocket("ws://localhost:8765");
-      const log = document.getElementById("log");
+    input, button {
+      margin: 10px 5px;
+      padding: 10px;
+      font-size: 16px;
+    }
 
-      function sendCmd(cmd) {
-        const roundCount = parseInt(
-          document.getElementById("roundCount").value
-        );
-        const timeLimit = parseInt(document.getElementById("timeLimit").value);
-        const restTime = parseInt(document.getElementById("restTime").value);
-        if (cmd === "start" && (!roundCount || !timeLimit || !restTime)) {
-          return alert("Vui lòng nhập số hiệp, thời gian và thời gian nghỉ.");
-        }
-        const message = {
-          type: "control",
-          data: cmd,
-        };
-        ws.send(JSON.stringify(message));
-        log.innerText += `Gửi lệnh: ${cmd}\n`;
-      }
-      function sendScore(side, point) {
-        const message = {
-          type: "control_vote",
-          data: { side, point },
-        };
-        ws.send(JSON.stringify(message));
-        log.innerText += `Gửi lệnh: ${JSON.stringify(message)}\n`;
+    .button-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h2>Nhập địa chỉ WebSocket</h2>
+  <input type="text" id="wsAddress" placeholder="ws://localhost:8080" />
+
+  <h3>Chọn vai trò:</h3>
+  <div class="button-group">
+    <button onclick="goToPage('referee.html', 'Ref1')">Referee 1</button>
+    <button onclick="goToPage('referee.html', 'Ref2')">Referee 2</button>
+    <button onclick="goToPage('referee.html', 'Ref3')">Referee 3</button>
+    <button onclick="goToPage('referee.html', 'Ref4')">Referee 4</button>
+    <button onclick="goToPage('referee.html', 'Ref5')">Referee 5</button>
+    <button onclick="goToPage('main-referee.html', 'main_Ref')">Main Referee</button>
+    <button onclick="goToPage('score.html', 'score')">Score</button>
+  </div>
+
+  <script>
+    function goToPage(page, role) {
+      const ws = document.getElementById("wsAddress").value.trim();
+      if (!ws) {
+        alert("Vui lòng nhập địa chỉ WebSocket!");
+        return;
       }
 
-      ws.onmessage = (event) => {
-        const msg = JSON.parse(event.data);
-        log.innerText += `\nServer: ${JSON.stringify(msg)}\n`;
-      };
-    </script>
-  </body>
+      const url = `${page}?ws=${encodeURIComponent(ws)}&role=${role}`;
+      window.location.href = url;
+    }
+  </script>
+</body>
 </html>

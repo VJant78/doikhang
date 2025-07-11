@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <title>Main-Referee</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(135deg, #e3f0ff 0%, #f9f9f9 100%);
+      min-height: 100vh;
+    }
+
+    .header {
+      text-align: center;
+      background: linear-gradient(90deg, #1e88e5 0%, #e53935 100%);
+      color: #fff;
+      font-size: 2.2rem;
+      font-weight: bold;
+      letter-spacing: 2px;
+      box-shadow: 0 2px 8px rgba(30,136,229,0.08);
+      border-radius: 0 0 18px 18px;
+      margin-bottom: 5px;
+    }
+
+    .header input {
+      font-size: 1.3rem;
+      padding: 8px 18px;
+      border-radius: 8px;
+      border: none;
+      outline: none;
+      width: 550px;
+      max-width: 90vw;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+
+    /* .connection-row {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      margin: 5px 0 5px 0;
+    } */
+
+    /* .connect-input {
+      padding: 8px 14px;
+      font-size: 1rem;
+      border-radius: 6px;
+      border: 1.5px solid #1e88e5;
+      outline: none;
+      min-width: 220px;
+      background: #f5faff;
+    }
+
+    .connect-btn {
+      background: linear-gradient(90deg, #43e97b 0%, #38f9d7 100%);
+      color: #fff;
+      border: none;
+      padding: 8px 22px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      border-radius: 6px;
+      box-shadow: 0 2px 8px rgba(67,233,123,0.08);
+      transition: background 0.2s;
+    }
+
+    .connect-btn:hover {
+      background: linear-gradient(90deg, #38f9d7 0%, #43e97b 100%);
+    }
+
+    #ws_status {
+      font-size: 1.1rem;
+      min-width: 120px;
+      display: inline-block;
+    } */
+
+    .top-section {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      padding: 0 30px 10px 30px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      gap: 18px;
+    }
+
+    .top-block, .top-center {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(30,136,229,0.07);
+      padding: 18px 10px 14px 10px;
+      min-width: 220px;
+      text-align: center;
+    }
+
+    .top-block {
+      width: 22%;
+      min-width: 180px;
+    }
+
+    .top-block .underline {
+      border-bottom: 2.5px solid #1e88e5;
+      margin: 8px auto 8px auto;
+      width: 70%;
+    }
+
+    .top-block input {
+      font-size: 1.1rem;
+      padding: 7px 10px;
+      border-radius: 6px;
+      border: 1.5px solid #e3e3e3;
+      outline: none;
+      margin-bottom: 4px;
+      background: #f7fafd;
+    }
+
+    .top-center {
+      width: 38%;
+      min-width: 260px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .top-center .round input {
+      font-size: 1.3rem;
+      font-weight: bold;
+      text-align: center;
+      border-radius: 6px;
+      border: 1.5px solid #e3e3e3;
+      padding: 7px 10px;
+      background: #f7fafd;
+    }
+
+    .top-center .timer input {
+      font-size: 2.1rem;
+      font-weight: bold;
+      border: 2.5px solid #e53935;
+      border-radius: 10px;
+      padding: 8px 30px;
+      background: #fff0f0;
+      color: #e53935;
+      text-align: center;
+      margin-top: 4px;
+      box-shadow: 0 2px 8px rgba(229,57,53,0.07);
+    }
+
+    .main-section {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 24px;
+    }
+
+    .judge-column {
+      display: grid;
+      grid-template-columns: repeat(2, 48px);
+      grid-template-rows: repeat(5, 48px);
+      gap: 7px;
+      background: #f7fafd;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(30,136,229,0.04);
+      padding: 10px 6px;
+    }
+
+    .square {
+      width: 48px;
+      height: 48px;
+      border: 2.5px solid #bdbdbd;
+      border-radius: 8px;
+      background: #fff;
+      transition: background 0.2s;
+    }
+
+    .score-box {
+      width: 500px;
+      height: 500px;
+      border-radius: 28px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 8rem;
+      font-weight: bold;
+      color: #fff;
+      box-shadow: 0 4px 24px rgba(30,136,229,0.13);
+      margin: 0 10px;
+      border: 6px solid #fff;
+    }
+
+    .red {
+      background: linear-gradient(135deg, #e53935 60%, #ffb3b3 100%);
+      border-color: #e53935;
+    }
+
+    .blue {
+      background: linear-gradient(135deg, #1e88e5 60%, #b3d1ff 100%);
+      border-color: #1e88e5;
+    }
+
+    .center-info {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 2px 8px rgba(30,136,229,0.07);
+      padding: 18px 18px 10px 18px;
+      min-width: 220px;
+    }
+
+    .weight-info {
+      border: 2px solid #1e88e5;
+      border-radius: 8px;
+      padding: 8px 18px;
+      text-align: center;
+      font-size: 1.1rem;
+      margin-bottom: 10px;
+      background: #f7fafd;
+      color: #1e88e5;
+      font-weight: 500;
+    }
+
+    .weight-info input {
+      font-size: 1.1rem;
+      padding: 6px 10px;
+      border-radius: 6px;
+      border: 1.5px solid #e3e3e3;
+      outline: none;
+      margin-bottom: 4px;
+      background: #f7fafd;
+      color: #1e88e5;
+      font-weight: 500;
+    }
+
+    .refs {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      font-size: 1.1rem;
+      margin-top: 10px;
+    }
+
+    .ref-row {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .ref-row .square {
+      font-size: 1.1rem;
+      text-align: center;
+      font-weight: bold;
+      align-content: space-around;
+    }
+    .label {
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: #333;
+      min-width: 32px;
+      text-align: center;
+    }
+
+    .bottom-section {
+      display: flex;
+      justify-content: center;
+      gap: 380px;
+      flex-wrap: wrap;
+    }
+
+    .bottom-boxes {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      align-items: center;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(30,136,229,0.07);
+      padding: 18px 18px 10px 18px;
+      min-width: 220px;
+    }
+
+    .bottom-box-row {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .btn-small {
+      width: 54px;
+      height: 54px;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      border: 2.5px solid #333;
+      font-weight: bold;
+      font-size: 1.2rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s, box-shadow 0.2s;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+
+    .btn-small:hover {
+      background: linear-gradient(135deg, #e3f0ff 0%, #b3d1ff 100%);
+      box-shadow: 0 4px 16px rgba(30,136,229,0.13);
+    }
+
+    .btn-warning {
+      padding: 0 18px;
+      height: 54px;
+      background: linear-gradient(90deg, #ffc107 0%, #fffde4 100%);
+      border: 2.5px solid #333;
+      font-weight: bold;
+      font-size: 1.1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s, box-shadow 0.2s;
+      box-shadow: 0 2px 8px rgba(255,193,7,0.08);
+    }
+
+    .btn-warning:hover {
+      background: linear-gradient(90deg, #fffde4 0%, #ffc107 100%);
+      box-shadow: 0 4px 16px rgba(255,193,7,0.13);
+    }
+
+    .btn-win {
+      width: 220px;
+      height: 60px;
+      background: linear-gradient(90deg, #4caf50 0%, #43e97b 100%);
+      color: white;
+      border: none;
+      font-size: 1.3rem;
+      font-weight: bold;
+      border-radius: 10px;
+      cursor: pointer;
+      margin-top: 10px;
+      box-shadow: 0 2px 8px rgba(76,175,80,0.08);
+      transition: background 0.2s, box-shadow 0.2s;
+    }
+
+    .btn-win:hover {
+      background: linear-gradient(90deg, #43e97b 0%, #4caf50 100%);
+      box-shadow: 0 4px 16px rgba(76,175,80,0.13);
+    }
+
+    .btn {
+      display: inline-block;
+      width: 140px;
+      height: 44px;
+      background: linear-gradient(90deg, #1e88e5 0%, #43e97b 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      text-align: center;
+      line-height: 44px;
+      cursor: pointer;
+      font-size: 1.1rem;
+      margin-bottom: 4px;
+      box-shadow: 0 2px 8px rgba(30,136,229,0.08);
+      transition: background 0.2s, box-shadow 0.2s;
+    }
+
+    .btn:hover {
+      background: linear-gradient(90deg, #43e97b 0%, #1e88e5 100%);
+      box-shadow: 0 4px 16px rgba(30,136,229,0.13);
+    }
+
+    input {
+      padding: 6px;
+      font-size: 1.1rem;
+      border-radius: 6px;
+      border: 1.5px solid #e3e3e3;
+      outline: none;
+      background: #f7fafd;
+      margin-bottom: 4px;
+    }
+
+    @media (max-width: 1100px) {
+      .main-section { flex-direction: column; align-items: center; }
+      .bottom-section { gap: 30px; }
+      .top-section { flex-direction: column; gap: 10px; }
+    }
+
+    @media (max-width: 700px) {
+      .score-box { font-size: 2.5rem; width: 120px; height: 90px; }
+      .header input { width: 90vw; }
+      .top-block, .top-center, .center-info, .bottom-boxes { min-width: 90vw; }
+    }
+  </style>
+</head>
+<body>
+  <!-- KẾT NỐI IP -->
+  <!-- <div class="connection-row">
+    <input type="text" id="ws_ip" class="connect-input" value="localhost:8765" placeholder="Nhập IP WebSocket" />
+    <button class="connect-btn" onclick="connectWS()">Kết nối</button>
+    <span id="ws_status" style="font-weight: bold; color: green;"></span>
+  </div> -->
+
+  <div class="header"><input type="text" id = "tournament" placeholder="Nhập tên giải"></div>
+
+  <div class="top-section">
+    <div class="top-block">
+      <div><input type="text" id="red_unit" placeholder="Nhập tên Đơn vị"></div>
+      <div class="underline"></div>
+      <div><input type="text" id="red_name" placeholder="Nhập tên VDV"> </div>
+    </div>
+
+    <div class="top-center">
+      <div class="round"><input type="text" id = "round" placeholder="Nhập số hiệp"></div>
+      <div class="timer"><input type="text" id = "time" placeholder="Nhập thời gian MM:SS"></div>
+    </div>
+
+    <div class="top-block">
+      <div><input type="text" id="blue_unit" placeholder="Nhập tên Đơn vị"></div>
+      <div class="underline"></div>
+       <div><input type="text" id="blue_name" placeholder="Nhập tên VDV"> </div>
+    </div>
+  </div>
+
+  <div class="main-section">
+    <!-- Judge Red -->
+    <div class="judge-column">
+      <div class="square" id="red-1-1"></div><div class="square" id="red-1-2"></div>
+      <div class="square" id="red-2-1"></div><div class="square" id="red-2-2"></div>
+      <div class="square" id="red-3-1"></div><div class="square" id="red-3-2"></div>
+      <div class="square" id="red-4-1"></div><div class="square" id="red-4-2"></div>
+      <div class="square" id="red-5-1"></div><div class="square" id="red-5-2"></div>
+    </div>
+
+    <!-- Score Red -->
+    <div class="score-box red" id ="score-red">00</div>
+
+    <!-- Center Info -->
+    <div class="center-info">
+      <div class="weight-info">
+        <div><input type="text" id = "weight" placeholder="Nhập cân nặng"></div>
+        <div><input type="text" id = "sex" placeholder="Nhập giới tính"></div>
+      </div>
+        <button class="btn" id ="sendData" onclick="sendData()">Gửi dữ liệu</button>
+        <button class="btn" id ="start" onclick="startMatch()">Bắt đầu</button>
+        <button class="btn" id ="pause" onclick="pauseMatch()">Tạm dừng</button>
+        <button class="btn" id = "end" onclick="endMatch()">Kết thúc</button>
+      
+        <button  class="btn" id ="reset" onclick="resetMatch()">Reset</button>
+      
+      <div class="refs">
+        <div class="ref-row">
+        <div class="square" id="red-H1"></div>
+        <div class="label">H1</div>
+        <div class="square" id="blue-H1"></div>
+      </div>
+      <div class="ref-row">
+        <div class="square" id="red-H2"></div>
+        <div class="label">H2</div>
+        <div class="square" id="blue-H2"></div>
+      </div>
+      <div class="ref-row">
+        <div class="square" id="red-H3"></div>
+        <div class="label">HP</div>
+        <div class="square" id="blue-H3"></div>
+      </div>
+
+      </div>
+    </div>
+
+    <!-- Score Blue -->
+    <div class="score-box blue" id ="score-blue">00</div>
+
+    <!-- Judge Blue -->
+    <div class="judge-column">
+      <div class="square" id="blue-1-1"></div><div class="square" id="blue-1-2"></div>
+      <div class="square" id="blue-2-1"></div><div class="square" id="blue-2-2"></div>
+      <div class="square" id="blue-3-1"></div><div class="square" id="blue-3-2"></div>
+      <div class="square" id="blue-4-1"></div><div class="square" id="blue-4-2"></div>
+      <div class="square" id="blue-5-1"></div><div class="square" id="blue-5-2"></div>
+    </div>
+  </div>
+
+   <div class="bottom-section">
+    <div class="bottom-boxes">
+      <div class="bottom-box-row">
+        <button onclick="sendVote('red', 1)" class="btn-small">+1</button>
+        <button onclick="sendVote('red', 2)" class="btn-small">+2</button>
+        <button onclick="sendVote('red', -1)" class="btn-small">-1</button>
+        <button onclick="sendVote('red', -2)" class="btn-small">-2</button>
+        <button onclick="sendWarn('red')" class="btn-warning">Nhắc nhở</button>
+      </div>
+      <button class="btn-win">Đỏ thắng</button>
+    </div>
+
+    <div class="bottom-boxes">
+      <div class="bottom-box-row">
+        <button onclick="sendVote('blue', 1)"  class="btn-small">+1</button>
+        <button onclick="sendVote('blue', 2)"  class="btn-small">+2</button>
+        <button onclick="sendVote('blue', -1)" class="btn-small">-1</button>
+        <button onclick="sendVote('blue', -2)" class="btn-small">-2</button>
+        <button onclick="sendWarn('blue')" class="btn-warning">Nhắc nhở</button>
+      </div>
+      <button class="btn-win">Xanh thắng</button>
+    </div>
+  </div>
+</body>
+<script>
+    let ws;
+    const exdata = [];
+    const params = new URLSearchParams(window.location.search);
+    const dataIPws = params.get("ws");
+    const datarole = params.get("role");
+    console.log("Data IP:", dataIPws, "Role:", datarole);
+    function connectWS() {
+      // const ip = document.getElementById("ws_ip").value.trim();
+      // if (!ip) return alert("Vui lòng nhập địa chỉ IP WebSocket");
+
+      ws = new WebSocket("ws://" + dataIPws);
+
+      ws.onopen = () => {
+        // document.getElementById("ws_status").textContent = "✅ Đã kết nối";
+        // Gửi định danh role là 'main_Ref'
+        ws.send(JSON.stringify({ type: "identify", role: "main_Ref" }));
+        console.log("🎯 Sent identify: main_Ref");
+      };
+
+      ws.onmessage = (event) => {
+        console.log("📥 Nhận từ server:", event.data);
+        // Bạn có thể xử lý hiển thị thông tin nhận ở đây nếu cần
+        const msg = JSON.parse(event.data);
+        switch (msg.type) {
+          case "score_result":
+            const { red, blue } = msg.data;
+            document.getElementById('score-red').textContent = red;
+            document.getElementById('score-blue').textContent = blue;
+            exdata.forEach((data) => applyScore(data,false));
+            exdata.length = 0; // Xóa mảng sau khi áp dụng điểm
+            break;
+          case "error":
+            alert(msg.data);
+            break;
+          case "vote":
+             const message = msg.data;
+             //push message to  const exampleData 
+             console.log("📤 message:", message);
+              exdata.push(message);
+              console.log("📤 exdata:", exdata);
+              exdata.forEach((data) => applyScore(data,true));
+              break;
+          case "match_state":
+            const match = msg.data;
+            window.currentStatus = match.status;
+            document.getElementById("round").value  = match.current_round;
+            document.getElementById("time").value  = formatTime(match.time_left);
+            // Bạn có thể hiển thị trạng thái và thời gian tại đâu đó trong giao diện nếu muốn
+            console.log("🎯 Trạng thái trận:", match.status, "⏱️", match.time_left);
+            break;
+          case "round_result":
+            const roundData = msg.data;
+            document.getElementById(`red-H${roundData.round}`).textContent = roundData.score_red
+            document.getElementById(`blue-H${roundData.round}`).textContent = roundData.score_blue
+            break;
+          default:
+            console.log(`❓ Không xác định: ${JSON.stringify(msg)}`);
+        }
+      };
+
+      ws.onerror = (e) => {
+        document.getElementById("ws_status").textContent = "❌ Lỗi kết nối";
+        console.error("WebSocket error:", e);
+      };
+
+      ws.onclose = () => {
+        document.getElementById("ws_status").textContent = "🔌 Mất kết nối";
+        console.warn("WebSocket closed");
+      };
+    }
+    connectWS();
+    function sendData() {
+      if (!ws || ws.readyState !== 1) {
+        alert("Chưa kết nối WebSocket!");
+        return;
+      }
+
+      const data = {
+        tournament: document.getElementById("tournament").value,
+        round: document.getElementById("round").value,
+        time: document.getElementById("time").value,
+        red_unit: document.getElementById("red_unit").value,
+        red_name: document.getElementById("red_name").value,
+        blue_unit: document.getElementById("blue_unit").value,
+        blue_name: document.getElementById("blue_name").value,
+        weight: document.getElementById("weight").value,
+        sex: document.getElementById("sex").value
+      };
+
+      ws.send(JSON.stringify({
+        type: "send_info",
+        data: data
+      }));
+
+      console.log("📤 Đã gửi thông tin:", data);
+    }
+
+    // Các hàm khác: startMatch, pauseMatch, endMatch, resetMatch
+    function startMatch() {
+  ws?.send(JSON.stringify({ type: "control", data: { command: "start" } }));
+  console.log("📤 Trận đấu đã bắt đầu") ;
+}
+function pauseMatch() {
+  ws?.send(JSON.stringify({ type: "control", data: { command: "pause" } }));
+}
+function endMatch() {
+  ws?.send(JSON.stringify({ type: "control", data: { command: "end" } }));
+}
+function resetMatch() {
+  ws?.send(JSON.stringify({ type: "control", data: { command: "reset" } }));
+}
+    function sendVote(side,point) { 
+        if (!ws || ws.readyState !== 1) {
+            alert("Chưa kết nối WebSocket!");
+            return;
+        }
+        const message = {
+        type: "vote",
+        data: {
+          referee_id: "main_Ref",
+          side: side,
+          point: point,
+        },
+      };
+      ws.send(JSON.stringify(message));
+    }
+
+    function sendWarn(side) { 
+        if (!ws || ws.readyState !== 1) {
+            alert("Chưa kết nối WebSocket!");
+            return;
+        }
+        const message = {
+        type: "warn",
+        data: {
+          side: side
+        },
+      };
+      ws.send(JSON.stringify(message));
+    }
+
+     //logic color for score
+    function applyScore(data,valid) {
+        console.log("📤 applyScore:", data);
+        const { referee_id, side, point } = data;
+        const buttonId = `${side}-${referee_id}-${point}`;
+        const btn = document.getElementById(buttonId);
+        if (btn && valid) {
+          btn.style.backgroundColor = side === "red" ? "red" : "blue";
+        }
+        if (btn && !valid) {
+          btn.style.backgroundColor = "white";
+        }
+        console.log("📤 applyScore_end:", buttonId, "  btn ", btn);
+      }
+   
+      document.addEventListener("keydown", function (event) {
+  if (event.code === "Space") {
+    event.preventDefault(); // không scroll trang
+    if (!ws || ws.readyState !== 1) return;
+
+    if (window.currentStatus === "paused") {
+      ws.send(JSON.stringify({ type: "control", data: { command: "start" } }));
+    } else if (window.currentStatus === "playing") {
+      ws.send(JSON.stringify({ type: "control", data: { command: "pause" } }));
+    }
+  }
+  if(event.code === "Digit1"){
+    sendVote('red', 1)
+  }
+  if(event.code === "Digit2"){
+    sendVote('red', 2)
+  }
+  if(event.code === "Digit3"){
+    sendVote('red', -1)
+  }
+  if(event.code === "Digit4"){
+    sendVote('red', -2)
+  }
+  if(event.code === "Digit5"){
+    sendWarn('red')
+  }
+  if(event.code === "Digit6"){
+    sendVote('blue', 1)
+  }
+  if(event.code === "Digit7"){
+    sendVote('blue', 2)
+  }
+  if(event.code === "Digit8"){
+    sendVote('blue', -1)
+  }
+  if(event.code === "Digit9"){
+    sendVote('blue', -2)
+  }
+  if(event.code === "Digit0"){
+    sendWarn('blue')
+  }
+
+});
+function formatTime(seconds) {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+}
+
+  </script>
+</html>

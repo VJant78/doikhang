@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trọng Tài</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      margin-top: 40px;
+    }
+    .main-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    .team-box {
+      border: 2px solid #ccc;
+      border-radius: 10px;
+      padding: 20px;
+      margin: 0 30px;
+      width: 220px;
+      text-align: center;
+    }
+    .red { border-color: #e74c3c; }
+    .blue { border-color: #3498db; }
+    .score {
+      font-size: 48px;
+      margin: 20px 0;
+    }
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+    }
+    .buttons button {
+      width: 60px;
+      height: 40px;
+      font-size: 18px;
+      cursor: pointer;
+    }
+    .red .score { color: #e74c3c; }
+    .blue .score { color: #3498db; }
+    .teams {
+      display: flex;
+      justify-content: center;
+      gap: 60px;
+      margin-bottom: 30px;
+    }
+    #log {
+      width: 80%;
+      max-width: 600px;
+      height: 200px;
+      overflow-y: auto;
+      border: 1px solid #ccc;
+      padding: 10px;
+      white-space: pre-wrap;
+      background-color: #f9f9f9;
+      font-family: monospace;
+      font-size: 14px;
+      margin-top: 20px;
+    }
+    input {
+      padding: 5px 10px;
+      font-size: 16px;
+    }
+    button.connect {
+      padding: 6px 12px;
+      font-size: 16px;
+      background-color: #27ae60;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    button.connect:hover {
+      background-color: #1e8449;
+    }
+  </style>
+</head>
+<body>
+  <div class="main-container">
+    <!-- <div class="row">
+      <label>WebSocket IP:</label>
+      <input type="text" id="ip" value="localhost:8765" />
+      <label>Referee ID:</label>
+      <input type="number" id="refId" placeholder="VD: 3" />
+      <button class="connect" onclick="connectWS()">Kết nối</button>
+    </div> -->
+
+    <div class="teams">
+      <div class="team-box red">
+        <h2>Đội Red</h2>
+        <div id="score-red" class="score">0</div>
+        <div class="buttons">
+          <button onclick="sendVote('red', 1)">+1</button>
+          <button onclick="sendVote('red', 2)">+2</button>
+        </div>
+      </div>
+      <div class="team-box blue">
+        <h2>Đội Blue</h2>
+        <div id="score-blue" class="score">0</div>
+        <div class="buttons">
+          <button onclick="sendVote('blue', 1)">+1</button>
+          <button onclick="sendVote('blue', 2)">+2</button>
+        </div>
+      </div>
+    </div>
+
+    <ul id="log"></ul>
+  </div>
+
+  <script>
+    let ws = null;
+    const log = document.getElementById("log");
+    
+    const params = new URLSearchParams(window.location.search);
+    const dataIPws = params.get("ws");
+    const datarole = params.get("role");
+    console.log("Data IP:", dataIPws, "Role:", datarole);
+    function connectWS() {
+      // const ip = document.getElementById("ip").value.trim();
+      // refId = parseInt(document.getElementById("refId").value);
+      // if (!ip || !refId) {
+      //   alert("Nhập đầy đủ IP và Referee ID!");
+      //   return;
+      // }
+
+      ws = new WebSocket("ws://" + dataIPws);
+
+      ws.onopen = () => {
+        log.textContent += `✅ Đã kết nối tới ws://${dataIPws}\n`;
+        // Gửi định danh
+        const identifyMsg = {
+          type: "identify",
+          role: `Ref${datarole}`,
+        };
+        ws.send(JSON.stringify(identifyMsg));
+        log.textContent += `📨 Gửi định danh: Ref${datarole}\n`;
+      };
+
+      ws.onmessage = (event) => {
+        const msg = JSON.parse(event.data);
+        switch (msg.type) {
+          case "score_result":
+            log.textContent += `📩 Server: ${JSON.stringify(msg)}\n`;
+            const { red, blue } = msg.data;
+            document.getElementById("score-red").textContent = red;
+            document.getElementById("score-blue").textContent = blue;
+            break;
+          case "error":
+            alert(msg.data);
+            break;
+          case "control":
+            log.textContent += `📢 Lệnh từ server: ${msg.data}\n`;
+            break;
+          default:
+            log.textContent += `❓ Không xác định: ${JSON.stringify(msg)}\n`;
+        }
+      };
+      
+      ws.onclose = () => {
+        log.textContent += `❌ WebSocket đã đóng.\n`;
+      };
+
+      ws.onerror = (err) => {
+        log.textContent += `🚨 Lỗi WebSocket: ${err.message}\n`;
+      };
+    }
+
+    connectWS(); 
+    function sendVote(side, point) {
+      if (!datarole) {
+        alert("Chưa nhập referee ID hoặc chưa kết nối.");
+        return;
+      }
+      if (!ws || ws.readyState !== 1) {
+        alert("Chưa kết nối WebSocket!");
+        return;
+      }
+
+      const message = {
+        type: "vote",
+        data: {
+          referee_id: datarole,
+          side: side,
+          point: point,
+        },
+      };
+      ws.send(JSON.stringify(message));
+      log.textContent += `📤 Gửi vote: ${side.toUpperCase()} +${point}\n`;
+    }
+  </script>
+</body>
+</html>

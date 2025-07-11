@@ -1,38 +1,93 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <title>Gửi dữ liệu dạng mảng</title>
-  </head>
-  <body>
-    <input type="text" id="name" placeholder="Tên" />
-    <input type="text" id="team" placeholder="Đội" />
-    <input type="number" id="score" placeholder="Điểm" />
-    <button onclick="sendData()">Gửi</button>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Bảng điểm đối kháng</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f2f2f2;
+      text-align: center;
+      padding: 50px;
+    }
 
-    <ul id="messages"></ul>
+    #round, #timer, #status {
+      font-size: 2em;
+      margin: 10px;
+    }
 
-    <script>
-      const ws = new WebSocket("ws://localhost:8765");
+    button {
+      padding: 10px 20px;
+      font-size: 1.2em;
+      margin: 5px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
 
-      ws.onopen = () => {
-        console.log("Đã kết nối tới WebSocket server.");
-      };
+    button:hover {
+      background-color: #ccc;
+    }
 
-      ws.onmessage = (event) => {
-        const li = document.createElement("li");
-        li.textContent = event.data;
-        document.getElementById("messages").appendChild(li);
-      };
+    #timer {
+      font-size: 4em;
+      color: #0077cc;
+    }
+  </style>
+</head>
+<body>
+  <div id="round">Hiệp: 1</div>
+  <div id="timer">02:00</div>
+  <div id="status">Tạm dừng</div>
 
-      function sendData() {
-        const name = document.getElementById("name").value;
-        const team = document.getElementById("team").value;
-        const score = parseInt(document.getElementById("score").value);
-        const datime = new Date().toISOString().slice(0, 19).replace("T", " ");
+  <button onclick="sendCommand('start')">Bắt đầu</button>
+  <button onclick="sendCommand('pause')">Tạm dừng</button>
+  <button onclick="sendCommand('reset')">Reset</button>
 
-        const dataArray = [name, team, score, datime];
-        ws.send(JSON.stringify(dataArray)); // Gửi mảng JSON
+  <script>
+  const ws = new WebSocket("ws://localhost:8000");
+  let currentStatus = "paused";
+
+  ws.onmessage = (event) => {
+    const data = JSON.parse(event.data);
+    document.getElementById("round").innerText = "Hiệp: " + data.current_round;
+    document.getElementById("timer").innerText = formatTime(data.time_left);
+    document.getElementById("status").innerText = getStatusText(data.status);
+    currentStatus = data.status;
+  };
+
+  function sendCommand(cmd) {
+    ws.send(JSON.stringify({ type: "control", command: cmd }));
+  }
+
+  function formatTime(seconds) {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  }
+
+  function getStatusText(status) {
+    switch(status) {
+      case 'playing': return 'Đang thi đấu';
+      case 'paused': return 'Tạm dừng';
+      case 'resting': return 'Nghỉ giữa hiệp';
+      case 'done': return 'Trận đấu kết thúc';
+      default: return status;
+    }
+  }
+
+  // Lắng nghe phím cách (Space)
+  document.addEventListener("keydown", function(event) {
+    if (event.code === "Space") {
+      event.preventDefault(); // tránh scroll xuống
+      if (currentStatus === "paused") {
+        sendCommand("start");
+      } else if (currentStatus === "playing") {
+        sendCommand("pause");
       }
-    </script>
-  </body>
+    }
+  });
+</script>
+
+</body>
 </html>
