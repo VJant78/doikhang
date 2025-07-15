@@ -388,16 +388,21 @@
               break;
           case "warn":
             const warnData = msg.data;
+            console.log("📤 warnData:", warnData);
             wdata.push(warnData);
             wdata.forEach((data) => {
               const { side,count } = data;
               const buttonId = `${side}-W-${count}`;
               const btn = document.getElementById(buttonId);
-              if (btn) {
+              if (btn && count > 0) {
                 btn.style.backgroundColor = side === "red" ? "red" : "blue";
               }
-              if(count ===0){
-                btn.style.backgroundColor = side === white;
+              else if(count ===0){
+                console.log("📤 count === 0:", side, count);
+                document.getElementById(`${side}-W-1`).style.backgroundColor = "white";
+                document.getElementById(`${side}-W-2`).style.backgroundColor = "white";
+                document.getElementById(`${side}-W-3`).style.backgroundColor = "white";
+                console.log(document.getElementById(`${side}-W-1`), document.getElementById(`${side}-W-2`), document.getElementById(`${side}-W-3`));
               }
             });
             break;
@@ -413,6 +418,14 @@
             const roundData = msg.data;
             document.getElementById(`red-H${roundData.round}`).textContent = roundData.score_red
             document.getElementById(`blue-H${roundData.round}`).textContent = roundData.score_blue
+             if (roundData.round === 1 && roundData.score_red === 0 && roundData.score_blue === 0) {
+              document.getElementById("red-H1").textContent = " ";
+              document.getElementById("red-H2").textContent = " ";
+              document.getElementById("red-H3").textContent = " ";
+              document.getElementById("blue-H1").textContent = " ";
+              document.getElementById("blue-H2").textContent = " ";
+              document.getElementById("blue-H3").textContent = " ";
+            }
           break;
           default:
             console.log(`❓ Không xác định: ${JSON.stringify(msg)}`);

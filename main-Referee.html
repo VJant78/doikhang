@@ -437,12 +437,12 @@
         <div><input type="text" id = "weight" placeholder="Nhập cân nặng"></div>
         <div><input type="text" id = "sex" placeholder="Nhập giới tính"></div>
       </div>
-        <button class="btn" id ="sendData" onclick="sendData()">Gửi dữ liệu</button>
-        <button class="btn" id ="start" onclick="startMatch()">Bắt đầu</button>
-        <button class="btn" id ="pause" onclick="pauseMatch()">Tạm dừng</button>
-        <button class="btn" id = "end" onclick="endMatch()">Kết thúc</button>
+        <button class="btn" id ="sendData" onclick="sendData()" >Gửi dữ liệu</button>
+        <button class="btn" id ="start" onclick="startMatch()"  >Bắt đầu</button>
+        <button class="btn" id ="pause" onclick="pauseMatch()"  >Tạm dừng</button>
+        <button class="btn" id = "end" onclick="endMatch()"  >Kết thúc</button>
       
-        <button  class="btn" id ="reset" onclick="resetMatch()">Reset</button>
+        <button  class="btn" id ="reset" onclick="resetMatch()"  >Reset</button>
       
       <div class="refs">
         <div class="ref-row">
@@ -503,6 +503,7 @@
 </body>
 <script>
     let ws;
+    let ready = false;
     const exdata = [];
     const params = new URLSearchParams(window.location.search);
     const dataIPws = params.get("ws");
@@ -556,6 +557,14 @@
             const roundData = msg.data;
             document.getElementById(`red-H${roundData.round}`).textContent = roundData.score_red
             document.getElementById(`blue-H${roundData.round}`).textContent = roundData.score_blue
+            if (roundData.round === 1 && roundData.score_red === 0 && roundData.score_blue === 0) {
+              document.getElementById("red-H1").textContent = " ";
+              document.getElementById("red-H2").textContent = " ";
+              document.getElementById("red-H3").textContent = " ";
+              document.getElementById("blue-H1").textContent = " ";
+              document.getElementById("blue-H2").textContent = " ";
+              document.getElementById("blue-H3").textContent = " ";
+            }
             break;
           default:
             console.log(`❓ Không xác định: ${JSON.stringify(msg)}`);
@@ -572,13 +581,14 @@
         console.warn("WebSocket closed");
       };
     }
+
     connectWS();
     function sendData() {
       if (!ws || ws.readyState !== 1) {
         alert("Chưa kết nối WebSocket!");
         return;
       }
-
+      
       const data = {
         tournament: document.getElementById("tournament").value,
         round: document.getElementById("round").value,
@@ -597,6 +607,9 @@
       }));
 
       console.log("📤 Đã gửi thông tin:", data);
+      ready = true;
+      console.log(ready) ;
+  
     }
 
     // Các hàm khác: startMatch, pauseMatch, endMatch, resetMatch
@@ -609,9 +622,12 @@ function pauseMatch() {
 }
 function endMatch() {
   ws?.send(JSON.stringify({ type: "control", data: { command: "end" } }));
+  ready = false;
 }
 function resetMatch() {
   ws?.send(JSON.stringify({ type: "control", data: { command: "reset" } }));
+  ready = false;
+
 }
     function sendVote(side,point) { 
         if (!ws || ws.readyState !== 1) {
@@ -669,34 +685,34 @@ function resetMatch() {
       ws.send(JSON.stringify({ type: "control", data: { command: "pause" } }));
     }
   }
-  if(event.code === "Digit1"){
+  if(event.code === "Digit1" && ready){
     sendVote('red', 1)
   }
-  if(event.code === "Digit2"){
+  if(event.code === "Digit2" && ready){
     sendVote('red', 2)
   }
-  if(event.code === "Digit3"){
+  if(event.code === "Digit3" && ready){
     sendVote('red', -1)
   }
-  if(event.code === "Digit4"){
+  if(event.code === "Digit4" && ready){
     sendVote('red', -2)
   }
-  if(event.code === "Digit5"){
+  if(event.code === "Digit5" && ready){
     sendWarn('red')
   }
-  if(event.code === "Digit6"){
+  if(event.code === "Digit6" && ready){
     sendVote('blue', 1)
   }
-  if(event.code === "Digit7"){
+  if(event.code === "Digit7" && ready){
     sendVote('blue', 2)
   }
-  if(event.code === "Digit8"){
+  if(event.code === "Digit8" && ready){
     sendVote('blue', -1)
   }
-  if(event.code === "Digit9"){
+  if(event.code === "Digit9" && ready){
     sendVote('blue', -2)
   }
-  if(event.code === "Digit0"){
+  if(event.code === "Digit0" && ready){
     sendWarn('blue')
   }
 

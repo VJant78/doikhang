@@ -197,7 +197,12 @@ async def handle_client(websocket):
                             score["blue"] = 0
                             await broadcast({"type": "score_result", "data": score})
                             warn["red"] = 0
-                            warn["blue"]: 0
+                            warn["blue"] = 0
+                            await client.send(json.dumps({"type": "warn", "data": {"side": "red", "count": warn["red"]}}))
+                            await client.send(json.dumps({"type": "warn", "data": {"side": "blue", "count": warn["blue"]}}))
+                            score["red"] = 0
+                            score["blue"] = 0
+                            await broadcast({"type": "round_result", "data": {"score_red":score["red"],"score_blue":score["blue"], "round": match_state["current_round"]}})
                         elif cmd == "end":
                             match_state["status"] = "paused"
                             await broadcast({"type": "round_result", "data": {"score_red":score["red"],"score_blue":score["blue"], "round": match_state["current_round"]}})
