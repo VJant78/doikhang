@@ -119,8 +119,6 @@ async def timer_loop():
                 else:
                     match_state["status"] = "resting"
                     match_state["time_left"] = match_state["rest_time"]
-                score["red"] = 0
-                score["blue"] = 0
                 await broadcast({"type": "score_result", "data": score})
         elif match_state["status"] == "resting":
             match_state["time_left"] -= 1
@@ -191,15 +189,14 @@ async def handle_client(websocket):
                                 timer_task = None
                                 timer_started = False
                             match_state["current_round"] = 1
-                            match_state["status"] = "paused"
+                            match_state["status"] = "done"
                             match_state["time_left"] = match_state["round_time"]
                             score["red"] = 0
                             score["blue"] = 0
                             await broadcast({"type": "score_result", "data": score})
                             warn["red"] = 0
                             warn["blue"] = 0
-                            await client.send(json.dumps({"type": "warn", "data": {"side": "red", "count": warn["red"]}}))
-                            await client.send(json.dumps({"type": "warn", "data": {"side": "blue", "count": warn["blue"]}}))
+                            await broadcast({"type": "warn_reset", "data": warn})
                             score["red"] = 0
                             score["blue"] = 0
                             await broadcast({"type": "round_result", "data": {"score_red":score["red"],"score_blue":score["blue"], "round": match_state["current_round"]}})
@@ -213,14 +210,13 @@ async def handle_client(websocket):
                                 match_state["status"] = "resting"
                                 match_state["time_left"] = match_state["rest_time"]
                                 match_state["current_round"] += 1
-                            score["red"] = 0
-                            score["blue"] = 0
                             await broadcast({"type": "score_result", "data": score})
                         await broadcast_match_state()
                 elif data["type"] == "send_info":
                     match_state["max_rounds"] = int(data["data"].get("round", match_state["max_rounds"]))
                     match_state["round_time"] = int(data["data"].get("time", match_state["round_time"]))
                     match_state["time_left"] = int(data["data"].get("time", match_state["time_left"]))
+                    match_state["status"] = "paused"
                     # Gửi chỉ cho client có role = score
                     for client, role in role_mapping.items():
                         if role == "score":

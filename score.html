@@ -397,14 +397,18 @@
               if (btn && count > 0) {
                 btn.style.backgroundColor = side === "red" ? "red" : "blue";
               }
-              else if(count ===0){
-                console.log("📤 count === 0:", side, count);
-                document.getElementById(`${side}-W-1`).style.backgroundColor = "white";
-                document.getElementById(`${side}-W-2`).style.backgroundColor = "white";
-                document.getElementById(`${side}-W-3`).style.backgroundColor = "white";
-                console.log(document.getElementById(`${side}-W-1`), document.getElementById(`${side}-W-2`), document.getElementById(`${side}-W-3`));
-              }
             });
+            break;
+          case "warn_reset":
+            const resetData = msg.data;
+            console.log("📤 resetData:", resetData);
+            wdata.length = 0; // Xóa mảng sau khi reset
+             Object.entries(resetData).forEach(([key, value]) => {
+                document.getElementById(`${key}-W-1`).style.backgroundColor = "white";
+                document.getElementById(`${key}-W-2`).style.backgroundColor = "white";
+                document.getElementById(`${key}-W-3`).style.backgroundColor = "white";
+            });
+        
             break;
            case "match_state":
             const match = msg.data;

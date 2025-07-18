@@ -675,7 +675,7 @@ function resetMatch() {
       }
    
       document.addEventListener("keydown", function (event) {
-  if (event.code === "Space") {
+  if (event.code === "Space" && ready) {
     event.preventDefault(); // không scroll trang
     if (!ws || ws.readyState !== 1) return;
 
