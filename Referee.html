@@ -10,6 +10,7 @@
       display: flex;
       justify-content: center;
       margin-top: 40px;
+      background-color: black;
     }
     .team-box {
       border: 2px solid #ccc;
@@ -44,17 +45,16 @@
 <body>
   <div class="teams">
     <div class="team-box red">
-      <h2>Đội Red</h2>
+
       <div class="buttons">
-        <button onclick="sendVote('red', 1)">+1</button>
-        <button onclick="sendVote('red', 2)">+2</button>
+        <button style="background-color: red; color: white; font-size: 150px;" onclick="sendVote('red', 1)">+1</button>
+        <button style="background-color: red; color: white; font-size: 150px;" onclick="sendVote('red', 2)">+2</button>
       </div>
     </div>
     <div class="team-box blue">
-      <h2>Đội Blue</h2>
       <div class="buttons">
-        <button onclick="sendVote('blue', 1)">+1</button>
-        <button onclick="sendVote('blue', 2)">+2</button>
+        <button style="background-color: blue; color: white; font-size: 150px;" onclick="sendVote('blue', 1)">+1</button>
+        <button style="background-color: blue; color: white; font-size: 150px;"onclick="sendVote('blue', 2)">+2</button>
       </div>
     </div>
   </div>
@@ -68,7 +68,7 @@
     function connectWS() {
 
 
-      ws = new WebSocket("ws://" + dataIPws);
+      ws = new WebSocket("wss://" + dataIPws);
 
       ws.onopen = () => {
         // Gửi định danh

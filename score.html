@@ -236,6 +236,14 @@
       .header { font-size: 1.2rem; }
       .top-block, .top-center, .center-info, .bottom-boxes { min-width: 90vw; }
     }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.2; }
+    }
+
+    .blink {
+      animation: blink 0.6s linear 5;
+    }
   </style>
 </head>
 <body>
@@ -403,10 +411,14 @@
             const resetData = msg.data;
             console.log("📤 resetData:", resetData);
             wdata.length = 0; // Xóa mảng sau khi reset
-             Object.entries(resetData).forEach(([key, value]) => {
+            Object.entries(resetData).forEach(([key, value]) => {
+              console.log(`${key} + ${value} start` )
+              if (value == 0){
                 document.getElementById(`${key}-W-1`).style.backgroundColor = "white";
                 document.getElementById(`${key}-W-2`).style.backgroundColor = "white";
                 document.getElementById(`${key}-W-3`).style.backgroundColor = "white";
+              }
+              console.log(`${key} + ${value} end` )
             });
         
             break;
@@ -431,6 +443,15 @@
               document.getElementById("blue-H3").textContent = " ";
             }
           break;
+          case "win":
+            const winData = msg.data;
+            console.log("📤 winData111:", winData.side);
+            if (winData.side === "red") {
+              blinkBox("score-red");
+            } else if (winData.side === "blue") {
+              blinkBox("score-blue");
+            }
+            break;
           default:
             console.log(`❓ Không xác định: ${JSON.stringify(msg)}`);
         }
@@ -468,6 +489,16 @@
   const s = seconds % 60;
   return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
 }
+function blinkBox(boxId) {
+  const box = document.getElementById(boxId);
+  console.log("📤 blinkBox:", boxId, "  box ", box);
+  box.classList.add("blink");
+  setTimeout(() => {
+    box.classList.remove("blink");
+  }, 3000); // Thời gian trùng với animation: 0.6s * 5
+}
+
+
 </script>
 </body>
 </html>

@@ -46,7 +46,7 @@ async def check_and_apply_votes():
 
 async def start_vote_timer():
     try:
-        await asyncio.sleep(2)
+        await asyncio.sleep(1)
         async with vote_lock:
             if vote_queue:
                 await check_and_apply_votes()
@@ -84,6 +84,7 @@ async def handle_vote(data, websocket):
         if vote_timer_task:
             vote_timer_task.cancel()
         vote_timer_task = asyncio.create_task(start_vote_timer())
+    
 
 # ==== Broadcasting ====
 async def broadcast(message):
@@ -140,6 +141,12 @@ async def handle_control_vote(data):
     print(f"📥 Phiếu từ trọng tài máy: {side} +{point} ")
     score[side] += point
     await broadcast_score()
+    if (side == 'blue' and point == -2 and warn["blue"] == 3):
+        warn["blue"] = 0
+    if (side == "red" and point == -2 and warn["red"] == 3):
+        warn["red"] = 0
+    await broadcast({"type": "warn_reset", "data": warn})
+
 
 async def handle_warn(data,client):
     side = data["data"]["side"]
@@ -229,6 +236,10 @@ async def handle_client(websocket):
                     for client, role in role_mapping.items():
                         if role == "score":
                             await handle_warn(data, client)
+                elif data["type"] == "win":
+                    for client, role in role_mapping.items():
+                        if role in ["score","main_Ref"]:
+                            await client.send(json.dumps(data))
             except Exception as e:
                 print("❌ Lỗi xử lý dữ liệu:", e)
 

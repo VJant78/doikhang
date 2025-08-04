@@ -387,6 +387,14 @@
       .header input { width: 90vw; }
       .top-block, .top-center, .center-info, .bottom-boxes { min-width: 90vw; }
     }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.2; }
+    }
+
+    .blink {
+      animation: blink 0.6s linear 5;
+    }
   </style>
 </head>
 <body>
@@ -483,10 +491,10 @@
         <button onclick="sendVote('red', 1)" class="btn-small">+1</button>
         <button onclick="sendVote('red', 2)" class="btn-small">+2</button>
         <button onclick="sendVote('red', -1)" class="btn-small">-1</button>
-        <button onclick="sendVote('red', -2)" class="btn-small">-2</button>
+        <button onclick="sendVote('red', -2)" class="btn-small">-2</button> 
         <button onclick="sendWarn('red')" class="btn-warning">Nhắc nhở</button>
       </div>
-      <button class="btn-win">Đỏ thắng</button>
+      <button onclick="redWins()" class="btn-win" >Đỏ thắng</button>
     </div>
 
     <div class="bottom-boxes">
@@ -497,7 +505,7 @@
         <button onclick="sendVote('blue', -2)" class="btn-small">-2</button>
         <button onclick="sendWarn('blue')" class="btn-warning">Nhắc nhở</button>
       </div>
-      <button class="btn-win">Xanh thắng</button>
+      <button onclick="blueWins()" class="btn-win">Xanh thắng</button>
     </div>
   </div>
 </body>
@@ -567,6 +575,14 @@
             }
             break;
           default:
+          case "win":
+            const winData = msg.data;
+            if (winData.side === "red") {
+              blinkBox("score-red");
+            } else if (winData.side === "blue") {
+              blinkBox("score-blue");
+            }
+            break;
             console.log(`❓ Không xác định: ${JSON.stringify(msg)}`);
         }
       };
@@ -721,6 +737,22 @@ function formatTime(seconds) {
   const m = Math.floor(seconds / 60);
   const s = seconds % 60;
   return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+}
+
+function blinkBox(boxId) {
+  const box = document.getElementById(boxId);
+  box.classList.add("blink");
+  setTimeout(() => {
+    box.classList.remove("blink");
+  }, 3000); // Thời gian trùng với animation: 0.6s * 5
+}
+
+function redWins() {
+   ws?.send(JSON.stringify({ type: "win", data: { side: "red" } }));  
+}
+
+function blueWins() {
+  ws?.send(JSON.stringify({ type: "win", data: { side: "blue" } }));
 }
 
   </script>
