@@ -682,7 +682,11 @@ function resetMatch() {
         const buttonId = `${side}-${referee_id}-${point}`;
         const btn = document.getElementById(buttonId);
         if (btn && valid) {
-          btn.style.backgroundColor = side === "red" ? "red" : "blue";
+          if (point === 2){
+            btn.style.backgroundColor = "green";
+          } else {
+            btn.style.backgroundColor = side === "red" ? "red" : "blue";
+          }
         }
         if (btn && !valid) {
           btn.style.backgroundColor = "white";

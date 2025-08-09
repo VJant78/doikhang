@@ -403,7 +403,7 @@
               const buttonId = `${side}-W-${count}`;
               const btn = document.getElementById(buttonId);
               if (btn && count > 0) {
-                btn.style.backgroundColor = side === "red" ? "red" : "blue";
+                btn.style.backgroundColor = "yellow";
               }
             });
             break;
@@ -470,14 +470,18 @@
     connectWS()
     
 
-    //logic color for score
+    //logic color forwa score
     function applyScore(data,valid) {
         console.log("📤 applyScore:", data);
         const { referee_id, side, point } = data;
         const buttonId = `${side}-${referee_id}-${point}`;
         const btn = document.getElementById(buttonId);
         if (btn && valid) {
-          btn.style.backgroundColor = side === "red" ? "red" : "blue";
+          if (point === 2){
+            btn.style.backgroundColor = "green";
+          } else {
+            btn.style.backgroundColor = side === "red" ? "red" : "blue";
+          }
         }
         if (btn && !valid) {
           btn.style.backgroundColor = "white";

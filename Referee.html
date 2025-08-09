@@ -68,7 +68,7 @@
     function connectWS() {
 
 
-      ws = new WebSocket("wss://" + dataIPws);
+      ws = new WebSocket("ws://" + dataIPws);
 
       ws.onopen = () => {
         // Gửi định danh
